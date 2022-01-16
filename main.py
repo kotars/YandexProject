@@ -47,8 +47,14 @@ def draw_pipes(pipes):
 def check_collision(pipes):
     for pipe in pipes:
         if bird_rect.colliderect(pipe):
+            hit_s = mixer.Sound('sound/sfx_hit.wav')
+            hit_s.set_volume(0.01)
+            hit_s.play()
             return 2
         if bird_rect.top <= -50 or bird_rect.bottom >= 450:
+            hit_s = mixer.Sound('sound/sfx_hit.wav')
+            hit_s.set_volume(0.01)
+            hit_s.play()
             return 2
     return 1
 
@@ -119,6 +125,10 @@ pipe_height = [200, 250, 300, 350, 400]
 game_over_img = load_image('gameover.png')
 menu_img = load_image('message.png')
 
+mixer.music.load('sound/Vint.wav')
+mixer.music.set_volume(0.025)  # 0.025 было
+mixer.music.play(-1)
+
 clock = pygame.time.Clock()
 running = True
 
@@ -129,6 +139,9 @@ while running:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
+                wings_s = mixer.Sound('sound/sfx_wing.wav')
+                wings_s.set_volume(0.025)
+                wings_s.play()
                 bird_movement = 0
                 bird_movement -= 8
             if event.key == pygame.K_SPACE and game_active == 0 or game_active == 2:
