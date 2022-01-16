@@ -1,6 +1,7 @@
 import os
 import sys
 import pygame
+import random
 
 pygame.init()
 screen = pygame.display.set_mode((288, 512))
@@ -20,6 +21,22 @@ def draw_floor():
     screen.blit(floor_surface, (floor_x_pos + 288, 450))
 
 
+def create_pipe():
+    new_pipe = pipe_surface.get_rect(midtop=(144, 256))
+    return new_pipe
+
+
+def move_pipes(pipes):
+    for pipe in pipes:
+        pipe.centerx -= 5
+    return pipes
+
+
+def draw_pipes(pipes):
+    for pipe in pipes:
+        screen.blit(pipe_surface, pipe)
+
+
 gravity = 0.25
 bird_movement = 0
 
@@ -30,6 +47,12 @@ floor_x_pos = 0
 
 bird_surface = load_image('bluebird-midflap.png')
 bird_rect = bird_surface.get_rect(center=(50, 256))
+
+pipe_surface = load_image('pipe-green.png')
+pipe_list = []
+SPAWNPIPE = pygame.USEREVENT
+pygame.time.set_timer(SPAWNPIPE, 1200)
+pipe_height = [200, 300, 400]
 
 clock = pygame.time.Clock()
 running = True
@@ -43,10 +66,15 @@ while running:
             if event.key == pygame.K_SPACE:
                 bird_movement = 0
                 bird_movement -= 8
+        if event.type == SPAWNPIPE:
+            pipe_list.append(create_pipe())
     screen.blit(bg_surface, (0, 0))
     bird_movement += gravity
     bird_rect.centery += bird_movement
     screen.blit(bird_surface, bird_rect)
+
+    pipe_list = move_pipes(pipe_list)
+    draw_pipes(pipe_list)
 
     floor_x_pos -= 5
     draw_floor()
