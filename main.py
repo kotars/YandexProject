@@ -39,6 +39,10 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                bird_movement = 0
+                bird_movement -= 8
     screen.blit(bg_surface, (0, 0))
     bird_movement += gravity
     bird_rect.centery += bird_movement
