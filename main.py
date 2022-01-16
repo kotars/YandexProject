@@ -20,10 +20,16 @@ def draw_floor():
     screen.blit(floor_surface, (floor_x_pos + 288, 450))
 
 
+gravity = 0.25
+bird_movement = 0
+
 bg_surface = load_image('background.png')
 
 floor_surface = load_image('base.png')
 floor_x_pos = 0
+
+bird_surface = load_image('bluebird-midflap.png')
+bird_rect = bird_surface.get_rect(center=(50, 256))
 
 clock = pygame.time.Clock()
 running = True
@@ -34,6 +40,9 @@ while running:
         if event.type == pygame.QUIT:
             running = False
     screen.blit(bg_surface, (0, 0))
+    bird_movement += gravity
+    bird_rect.centery += bird_movement
+    screen.blit(bird_surface, bird_rect)
 
     floor_x_pos -= 5
     draw_floor()
