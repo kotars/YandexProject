@@ -24,8 +24,8 @@ def draw_floor():
 
 def create_pipe():
     random_pipe_pos = random.choice(pipe_height)
-    new_pipe = pipe_surface.get_rect(midtop=(350, random_pipe_pos))
-    top_pipe = pipe_surface.get_rect(midbottom=(350, random_pipe_pos - 175))
+    new_pipe = pipe_surface.get_rect(midtop=(300, random_pipe_pos))
+    top_pipe = pipe_surface.get_rect(midbottom=(300, random_pipe_pos - 175))
     return new_pipe, top_pipe
 
 
@@ -47,8 +47,14 @@ def draw_pipes(pipes):
 def check_collision(pipes):
     for pipe in pipes:
         if bird_rect.colliderect(pipe):
+            hit_s = mixer.Sound('sound/sfx_hit.wav')
+            hit_s.set_volume(0.01)
+            hit_s.play()
             return 2
         if bird_rect.top <= -50 or bird_rect.bottom >= 450:
+            hit_s = mixer.Sound('sound/sfx_hit.wav')
+            hit_s.set_volume(0.01)
+            hit_s.play()
             return 2
     return 1
 
@@ -70,18 +76,30 @@ def score_display(game_state):
         score_rect = score_surface.get_rect(center=(144, 50))
         screen.blit(score_surface, score_rect)
     if game_state == 'game_over':
-        score_surface = game_font.render(f'Score: {int(score)}', True, (255, 255, 255))
+        score_surface = game_font.render(f'Time: {int(score)}', True, (255, 255, 255))
         score_rect = score_surface.get_rect(center=(144, 50))
         screen.blit(score_surface, score_rect)
 
-        high_score_surface = game_font.render(f'High Score: {int(high_score)}', True, (255, 255, 255))
+        high_score_surface = game_font.render(f'High Time: {int(high_score)}', True, (255, 255, 255))
         high_score_rect = score_surface.get_rect(center=(144, 425))
         screen.blit(high_score_surface, high_score_rect)
 
 
 def update_score(scor, high_scor):
-    if scor > high_scor:
+    if high_scor < scor:
         high_scor = scor
+    if time_ == '':
+        time = open('high_time.txt', 'w')
+        time.seek(0)
+        time.write(str(int(high_scor)))
+        time.close()
+    elif int(time_) > high_scor:
+        high_scor = int(time_)
+    elif int(time_) < high_scor:
+        time = open('high_time.txt', 'w')
+        time.seek(0)
+        time.write(high_scor)
+        time.close()
     return high_scor
 
 
@@ -90,6 +108,10 @@ bird_movement = 0
 game_active = 0
 score = 0
 high_score = 0
+
+time = open('high_time.txt', 'r')
+time_ = time.read()
+time.close()
 
 game_font = pygame.font.Font('04B_19.TTF', 20)
 
@@ -119,16 +141,22 @@ pipe_height = [200, 250, 300, 350, 400]
 game_over_img = load_image('gameover.png')
 menu_img = load_image('message.png')
 
+mixer.music.load('sound/Vint.wav')
+mixer.music.set_volume(0.025)  # 0.025 было
+mixer.music.play(-1)
+
 clock = pygame.time.Clock()
 running = True
 
 while running:
-    # обработчик событий
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
+                wings_s = mixer.Sound('sound/sfx_wing.wav')
+                wings_s.set_volume(0.025)
+                wings_s.play()
                 bird_movement = 0
                 bird_movement -= 8
             if event.key == pygame.K_SPACE and game_active == 0 or game_active == 2:
@@ -139,7 +167,6 @@ while running:
                 score = 0
         if event.type == SPAWNPIPE:
             pipe_list.extend(create_pipe())
-            print(pipe_list)
         if event.type == BIRDFLAP:
             if bird_index < 2:
                 bird_index += 1
@@ -155,12 +182,10 @@ while running:
         rotated_bird = rotate_bird(bird_surface)
         bird_rect.centery += bird_movement
         screen.blit(rotated_bird, bird_rect)
+        score += 0.01
         game_active = check_collision(pipe_list)
-        score_flag = check_collision(pipe_list_between)
         pipe_list = move_pipes(pipe_list)
         draw_pipes(pipe_list)
-        if score_flag == 2:
-            score += 1
         score_display('main_game')
     elif game_active == 2:
         screen.blit(game_over_img, (50, 200))
